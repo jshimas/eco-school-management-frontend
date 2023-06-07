@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import UsersApi from '../api/UsersApi'
+import VueCookies from 'vue-cookies'
 
 const defaultState = {
   user: null,
@@ -13,6 +14,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     logout() {
       document.cookie = 'jwt=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+      VueCookies.remove('jwt')
 
       Object.assign(this, defaultState)
     },
@@ -23,7 +25,9 @@ export const useUserStore = defineStore('user', {
 
         // Call the API to login
         const userApi = new UsersApi()
-        await userApi.login(credentials)
+        this.error = false
+        const res = await userApi.login(credentials)
+        VueCookies.set('jwt', res.data.token)
       } catch (error) {
         console.log(error)
         this.error = error.response.data.message

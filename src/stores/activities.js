@@ -67,7 +67,6 @@ export const useActivitiesStore = defineStore('activity', {
     },
     inProgress() {
       return this.activities.filter((a) => {
-        console.log('startDate: ', a.startDate, 'today: ', new Date(), 'endDate: ', a.endDate)
         return new Date(a.startDate) >= new Date() && !a.endDate
       })
     },

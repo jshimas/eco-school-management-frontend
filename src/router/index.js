@@ -6,6 +6,7 @@ import ActivitiesView from '../views/activities/ActivitiesView.vue'
 import MeetingsView from '../views/meetings/MeetingsView.vue'
 import UserProfileView from '../views/users/UserProfileView.vue'
 import { useUserStore } from '../stores/user'
+import VueCookies from 'vue-cookies'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,13 +49,15 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   if (to.name !== 'login' && !userStore.user) {
-    userStore
-      .getMe() // tries to fetch user that has a jwt token stored
-      .then(() => next()) // if jwt is valid, let user access the website
-      .catch(() => next({ name: 'login' })) // redirect to login, if jwt is invalid
+    await userStore.getMe()
+    if (!userStore.user) {
+      next({ name: 'login' })
+    } else {
+      next()
+    }
   } else next()
 })
 
