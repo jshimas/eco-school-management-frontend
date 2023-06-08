@@ -55,6 +55,21 @@ export const useActivitiesStore = defineStore('activity', {
       } finally {
         this.loading = false
       }
+    },
+    async createActivity(data) {
+      try {
+        this.loading = true
+        const userStore = useUserStore()
+        const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
+
+        const res = await activitiesApi.createActivity(data)
+        return await res.data;
+      } catch (err) {
+        console.log(err)
+        this.error = err
+      } finally {
+        this.loading = false
+      }
     }
   },
 

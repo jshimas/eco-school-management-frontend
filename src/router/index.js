@@ -6,6 +6,7 @@ import ActivitiesView from '../views/activities/ActivitiesView.vue'
 import MeetingsView from '../views/meetings/MeetingsView.vue'
 import UserProfileView from '../views/users/UserProfileView.vue'
 import { useUserStore } from '../stores/user'
+import CreateActivityView from '../views/activities/CreateActivityView.vue'
 import VueCookies from 'vue-cookies'
 
 const router = createRouter({
@@ -44,6 +45,12 @@ const router = createRouter({
       path: '/schools/:schoolId/meetings',
       name: 'schoolMeetings',
       component: MeetingsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/schools/:schoolId/activities/create',
+      name: 'createActivity',
+      component: CreateActivityView,
       meta: { requiresAuth: true }
     }
   ]

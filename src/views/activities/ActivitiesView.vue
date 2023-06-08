@@ -85,7 +85,9 @@
         :message="'No pending actions at the moment'"
       />
     </div>
-    <button class="btn btn-success"></button>
+    <router-link :to="{name: 'createActivity'}">
+      <button class="btn btn-success">Create activity</button>
+    </router-link>
   </div>
 </template>
 

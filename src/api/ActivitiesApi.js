@@ -20,6 +20,10 @@ class ActivitiesApi extends Api {
   async deleteActivity(id) {
     return await this.delete(`/${id}`)
   }
+
+  async createActivity(data) {
+    return await this.post('', data)
+  }
 }
 
 export default ActivitiesApi
