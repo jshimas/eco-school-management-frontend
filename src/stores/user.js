@@ -5,7 +5,8 @@ import VueCookies from 'vue-cookies'
 const defaultState = {
   user: null,
   loading: false,
-  error: null
+  error: null,
+  users: []
 }
 
 export const useUserStore = defineStore('user', {
@@ -42,6 +43,23 @@ export const useUserStore = defineStore('user', {
         const userApi = new UsersApi()
         const res = await userApi.getCurrentUser()
         this.user = res.data.user
+      } catch (error) {
+        console.log(error)
+        this.error = error.response.data.message
+      } finally {
+        this.loading = false
+      }
+    },
+    async getAllUsers() {
+      try {
+        this.loading = true
+
+        const userApi = new UsersApi()
+        const res = await userApi.getAllUsers()
+        
+        console.log(res);
+
+        this.users = res.data.users
       } catch (error) {
         console.log(error)
         this.error = error.response.data.message
