@@ -63,7 +63,7 @@ export const useActivitiesStore = defineStore('activity', {
         const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
 
         const res = await activitiesApi.createActivity(data)
-        return await res.data;
+        return await res.data
       } catch (err) {
         console.log(err)
         this.error = err
@@ -82,11 +82,11 @@ export const useActivitiesStore = defineStore('activity', {
     },
     inProgress() {
       return this.activities.filter((a) => {
-        return new Date(a.startDate) >= new Date() && !a.endDate
+        return new Date(a.startDate) < new Date() && !a.endDate
       })
     },
-    finished() {
-      return this.activities.filter((a) => a.endDate)
+    planned() {
+      return this.activities.filter((a) => a.approved && new Date(a.startDate) > new Date())
     }
   }
 })

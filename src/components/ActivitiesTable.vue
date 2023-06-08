@@ -7,7 +7,7 @@
           <th class="fw-bold">Activity</th>
           <th class="fw-bold">Start date</th>
           <th class="fw-bold">State</th>
-          <th class="fw-bold" v-if="withActions">Actions</th>
+          <th class="fw-bold" v-if="withActions && userStore.user.role !== 'member'">Actions</th>
         </tr>
       </thead>
       <tbody class="table-group-divider">
@@ -16,7 +16,7 @@
           <td>{{ activity.name }}</td>
           <td>{{ formatDate(activity.startDate) }}</td>
           <td>{{ getStateName(activity) }}</td>
-          <td v-if="withActions">
+          <td v-if="withActions && userStore.user.role !== 'member'">
             <div class="hstack gap-2">
               <button
                 class="btn btn-sm btn-outline-success mr-2"
@@ -42,16 +42,18 @@
 
 <script>
 import { useActivitiesStore } from '../stores/activities'
+import { useUserStore } from '../stores/user'
 
 export default {
   name: 'ActivitiesTable',
   props: ['activities', 'withActions', 'message'],
   setup() {
     const activitiesStore = useActivitiesStore()
+    const userStore = useUserStore()
 
     function getStateName(activity) {
       if (!activity.approved) return 'pending'
-      else if (activity.startDate < new Date()) return 'ready'
+      else if (new Date(activity.startDate) > new Date() && !activity.endDate) return 'planned'
       else if (activity.endDate) return 'finished'
       else return 'in progress'
     }
@@ -64,7 +66,8 @@ export default {
     return {
       activitiesStore,
       formatDate,
-      getStateName
+      getStateName,
+      userStore
     }
   }
 }

@@ -22,6 +22,7 @@ class ActivitiesApi extends Api {
   }
 
   async createActivity(data) {
+    console.log('DATA TO SEND', data)
     return await this.post('', data)
   }
 }

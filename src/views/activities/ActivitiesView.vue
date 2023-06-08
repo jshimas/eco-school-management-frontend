@@ -16,20 +16,21 @@
           name="btnradio"
           id="btn-radio-approved"
           autocomplete="off"
-          checked
+          :checked="filter === 'approved'"
           @click="filter = 'approved'"
         />
-        <label class="btn btn-outline-primary" for="btn-radio-approved">Approved</label>
+        <label class="btn btn-outline-primary" for="btn-radio-approved">All</label>
 
         <input
           type="radio"
           class="btn-check"
           name="btnradio"
-          id="btn-radio-ready"
+          id="btn-radio-planned"
           autocomplete="off"
-          @click="filter = 'ready'"
+          :checked="filter === 'planned'"
+          @click="filter = 'planned'"
         />
-        <label class="btn btn-outline-primary" for="btn-radio-ready">Ready</label>
+        <label class="btn btn-outline-primary" for="btn-radio-planned">Planned</label>
 
         <input
           type="radio"
@@ -37,9 +38,10 @@
           name="btnradio"
           id="btn-radio-in-progress"
           autocomplete="off"
+          :checked="filter === 'inProgress'"
           @click="filter = 'inProgress'"
         />
-        <label class="btn btn-outline-primary" for="btn-radio-in-progress">In Progress</label>
+        <label class="btn btn-outline-primary" for="btn-radio-in-progress">In progress</label>
 
         <input
           type="radio"
@@ -47,6 +49,7 @@
           name="btnradio"
           id="btn-radio-pending"
           autocomplete="off"
+          :checked="filter === 'pending'"
           @click="filter = 'pending'"
         />
         <label class="btn btn-outline-primary" for="btn-radio-pending"
@@ -67,10 +70,10 @@
         :message="'No approved actions at the moment'"
       />
       <ActivitiesTable
-        v-if="filter === 'ready'"
-        :activities="activitiesStore.ready"
+        v-if="filter === 'planned'"
+        :activities="activitiesStore.planned"
         :withActions="false"
-        :message="'No ready actions at the moment'"
+        :message="'No planned actions at the moment'"
       />
       <ActivitiesTable
         v-if="filter === 'inProgress'"
@@ -85,7 +88,7 @@
         :message="'No pending actions at the moment'"
       />
     </div>
-    <router-link :to="{name: 'createActivity'}">
+    <router-link :to="{ name: 'createActivity' }">
       <button class="btn btn-success">Create activity</button>
     </router-link>
   </div>

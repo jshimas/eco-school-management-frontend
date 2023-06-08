@@ -25,7 +25,7 @@ export const useUserStore = defineStore('user', {
 
         // Call the API to login
         const userApi = new UsersApi()
-        this.error = false
+        this.error = null
         const res = await userApi.login(credentials)
         VueCookies.set('jwt', res.data.token)
       } catch (error) {
@@ -56,10 +56,11 @@ export const useUserStore = defineStore('user', {
 
         const userApi = new UsersApi()
         const res = await userApi.getAllUsers()
-        
-        console.log(res);
+
+        console.log(res)
 
         this.users = res.data.users
+        console.log(this.users)
       } catch (error) {
         console.log(error)
         this.error = error.response.data.message
