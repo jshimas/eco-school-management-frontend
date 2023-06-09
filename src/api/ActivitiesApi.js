@@ -5,7 +5,7 @@ class ActivitiesApi extends Api {
     super(`/schools/${schoolId}/activities`)
   }
 
-  static async getActivityById(id) {
+  async getActivityById(id) {
     return await this.get(`/${id}`)
   }
 

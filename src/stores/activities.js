@@ -5,6 +5,7 @@ import { useUserStore } from './user'
 export const useActivitiesStore = defineStore('activity', {
   state: () => ({
     activities: null,
+    activity: null,
     error: null,
     loading: false
   }),
@@ -18,6 +19,22 @@ export const useActivitiesStore = defineStore('activity', {
         const res = await activitiesApi.getAllActivities()
         this.activities = res.data.activities
       } catch (err) {
+        this.error = err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchActivity(activityId) {
+      try {
+        this.loading = true
+        const userStore = useUserStore()
+        console.log(userStore.user.schoolId)
+        const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
+        const res = await activitiesApi.getActivityById(activityId)
+        this.activity = res.data.activity
+      } catch (err) {
+        console.log(err)
         this.error = err
       } finally {
         this.loading = false

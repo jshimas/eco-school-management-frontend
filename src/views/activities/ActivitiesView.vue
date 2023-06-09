@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <h1>Activities</h1>
     <h3>Project: {{ projectStore.school.projectName }}</h3>
-    <h6 class="">School: {{ projectStore.school.name }}</h6>
+    <h6>School: {{ projectStore.school.name }}</h6>
 
     <div v-if="activitiesStore.loading" class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -89,7 +89,7 @@
       />
     </div>
     <router-link :to="{ name: 'createActivity' }">
-      <button class="btn btn-success">Create activity</button>
+      <button class="btn btn-success"><i class="bi bi-plus"></i> Create activity</button>
     </router-link>
   </div>
 </template>

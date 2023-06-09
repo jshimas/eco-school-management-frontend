@@ -6,7 +6,7 @@ const defaultState = {
   user: null,
   loading: false,
   error: null,
-  users: []
+  users: null
 }
 
 export const useUserStore = defineStore('user', {

@@ -1,5 +1,52 @@
 <template>
   <div class="container mt-5 mb-5 d-flex flex-column align-items-center">
+    <div class="col-md-6 p-0 m-0">
+      <!-- Button trigger modal -->
+      <button
+        type="button"
+        class="btn btn-light align-self-start"
+        data-bs-toggle="modal"
+        data-bs-target="#modal"
+      >
+        <i class="bi bi-arrow-left"></i> Back to activities
+      </button>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="modal"
+      aria-labelledby="cancelActivityCreationModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Do you want to go back?</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">All the activity creation data will be lost</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stay</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-dismiss="modal"
+              @click="handleReturn"
+            >
+              Go back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create activity form -->
     <h1>Create Activity</h1>
 
     <div v-if="userStore.loading" class="spinner-border text-primary" role="status">
@@ -8,7 +55,7 @@
     <div v-if="!userStore.loading" class="col-md-6">
       <form class="vstack gap-2" @submit.prevent="createActivity">
         <div class="form-group">
-          <label for="theme">Theme</label>
+          <label for="theme">Theme*</label>
           <input
             id="theme"
             type="text"
@@ -21,7 +68,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="name">Name</label>
+          <label for="name">Name*</label>
           <input
             id="name"
             type="text"
@@ -34,7 +81,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="location">Location</label>
+          <label for="location">Location*</label>
           <input
             id="location"
             type="text"
@@ -47,7 +94,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="startDate">Start Date</label>
+          <label for="startDate">Start Date*</label>
           <input
             id="startDate"
             type="date"
@@ -60,7 +107,7 @@
           </div>
         </div>
         <div>
-          <label for="supervisors">Supervisors</label>
+          <label for="supervisors">Supervisors*</label>
           <div class="form-check" v-for="user in userStore.users" :key="user.id">
             <input
               type="checkbox"
@@ -77,6 +124,74 @@
             <div class="text-danger">{{ error.$message }}</div>
           </div>
         </div>
+
+        <!-- optional fields -->
+        <div>
+          <button
+            type="button"
+            class="btn btn-light mb-2"
+            data-bs-toggle="collapse"
+            data-bs-target="#optional-fields"
+            aria-expanded="false"
+            aria-controls="optional-fields"
+          >
+            Add extra information
+          </button>
+          <div class="collapse vstack gap-2" id="optional-fields">
+            <div class="collapse form-group">
+              <label for="reason">Reason</label>
+              <input
+                id="reason"
+                type="text"
+                class="form-control"
+                placeholder="Write a motive for the activity"
+                v-model="activity.reason"
+              />
+            </div>
+            <div class="form-group optional-field">
+              <label for="goal">Goal</label>
+              <input
+                id="goal"
+                type="text"
+                class="form-control"
+                placeholder="Write a goal for the activity"
+                v-model="activity.goal"
+              />
+            </div>
+            <div class="form-group">
+              <label for="result">Result</label>
+              <input
+                id="result"
+                type="text"
+                class="form-control"
+                placeholder="Write the result of the activity"
+                v-model="activity.result"
+              />
+            </div>
+            <div class="form-group">
+              <label for="resources">Resources</label>
+              <input
+                id="resources"
+                type="text"
+                class="form-control"
+                placeholder="Write the needed resources for the activity"
+                v-model="activity.resources"
+              />
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <input
+                id="notes"
+                type="text"
+                class="form-control"
+                placeholder="Any extra notes..."
+                v-model="activity.notes"
+              />
+            </div>
+          </div>
+        </div>
+        <p>*Required fields</p>
+
         <button type="submit" class="btn btn-success">Create</button>
       </form>
     </div>
@@ -100,7 +215,12 @@ const activity = reactive({
   name: '',
   location: '',
   startDate: '',
-  supervisorsIds: []
+  supervisorsIds: [],
+  reason: '',
+  goal: '',
+  result: '',
+  resources: '',
+  notes: ''
 })
 
 const rules = {
@@ -127,11 +247,14 @@ const createActivity = async () => {
   const isFormCorrect = await unref(v$).$validate()
   if (!isFormCorrect) return
 
-  const res = await activitiesStore.createActivity(activity)
+  await activitiesStore.createActivity(activity)
   await activitiesStore.fetchUserActivities()
-  if (res) {
-    console.log(res)
+  if (!activitiesStore.error) {
     router.push({ name: 'schoolActivities', params: { schoolId: route.params.schoolId } })
   }
+}
+
+const handleReturn = () => {
+  router.push({ name: 'schoolActivities', params: { schoolId: route.params.schoolId } })
 }
 </script>

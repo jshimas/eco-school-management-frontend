@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '../stores/user'
+
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProjectView from '../views/ProjectView.vue'
 import ActivitiesView from '../views/activities/ActivitiesView.vue'
 import MeetingsView from '../views/meetings/MeetingsView.vue'
 import UserProfileView from '../views/users/UserProfileView.vue'
-import { useUserStore } from '../stores/user'
 import CreateActivityView from '../views/activities/CreateActivityView.vue'
-import VueCookies from 'vue-cookies'
+import ActivityView from '../views/activities/ActivityView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +52,12 @@ const router = createRouter({
       path: '/schools/:schoolId/activities/create',
       name: 'createActivity',
       component: CreateActivityView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/schools/:schoolId/activities/:activityId',
+      name: 'activity',
+      component: ActivityView,
       meta: { requiresAuth: true }
     }
   ]

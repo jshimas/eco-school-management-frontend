@@ -11,7 +11,12 @@
         </tr>
       </thead>
       <tbody class="table-group-divider">
-        <tr v-for="activity in activities" :key="activity.id">
+        <tr
+          v-for="activity in activities"
+          :key="activity.id"
+          class="clickable-row"
+          @click="navigateToActivity(activity.id)"
+        >
           <td>{{ activity.theme }}</td>
           <td>{{ activity.name }}</td>
           <td>{{ formatDate(activity.startDate) }}</td>
@@ -43,11 +48,13 @@
 <script>
 import { useActivitiesStore } from '../stores/activities'
 import { useUserStore } from '../stores/user'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'ActivitiesTable',
   props: ['activities', 'withActions', 'message'],
   setup() {
+    const router = useRouter()
     const activitiesStore = useActivitiesStore()
     const userStore = useUserStore()
 
@@ -63,11 +70,19 @@ export default {
       return date.toLocaleString('en-US')
     }
 
+    function navigateToActivity(activityId) {
+      router.push({
+        name: 'activity',
+        params: { schoolId: userStore.user.schoolId, activityId: activityId }
+      })
+    }
+
     return {
       activitiesStore,
       formatDate,
       getStateName,
-      userStore
+      userStore,
+      navigateToActivity
     }
   }
 }
