@@ -1,98 +1,106 @@
 <template>
   <div class="container mt-4 mb-5 d-flex flex-column align-items-center">
-    <div v-if="activitiesStore.loading" class="spinner-border text-primary" role="status">
+    <div
+      v-if="activitiesStore.loading && updateState"
+      class="spinner-border text-primary"
+      role="status"
+    >
       <span class="visually-hidden">Loading...</span>
     </div>
-    <div v-if="!activitiesStore.loading" class="col-10">
+
+    <div v-if="!activitiesStore.loading" class="col-12">
       <div class="mb-4">
-        <h5 class="align-self-start mb-0">Activity</h5>
-        <h2 class="mb-0">{{ activitiesStore.activity.name }}</h2>
+        <h2 class="mb-0">{{ activity.name }}</h2>
         <div class="hstack gap-2">
-          <span class="badge rounded-pill bg-primary">{{ activitiesStore.activity.theme }}</span>
-          <span v-if="activitiesStore.activity.approved" class="badge rounded-pill bg-success"
-            >Approved</span
-          >
+          <span class="badge rounded-pill bg-primary">{{ activity.theme }}</span>
+          <span v-if="activity.approved" class="badge rounded-pill bg-success">Approved</span>
           <span v-else class="badge rounded-pill bg-secondary">Waiting for approval</span>
-          <div class="form-check form-switch ms-auto">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="edit"
-              @change="updateSupervisors = !updateSupervisors"
-            />
-            <label class="form-check-label" for="flexSwitchCheckDefault">Edit</label>
+          <div class="ms-auto">
+            <button
+              v-if="!updateState"
+              class="btn btn-outline-primary"
+              @click.prevent="updateState = !updateState"
+            >
+              <i class="bi bi-pen"></i> Edit execution details
+            </button>
+            <div v-else class="hstack gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                @click.prevent="handleCancelEdit"
+              >
+                <i class="bi bi-x-lg"></i> CANCEL
+              </button>
+              <button type="button" class="btn btn-success" @click.prevent="handleSave">
+                <i class="bi bi-save"></i> SAVE
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- supervisors -->
       <div class="row g-2">
+        <!-- supervisors -->
         <div class="vstack col-2">
-          <div v-if="!updateSupervisors">
-            <div
-              class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
-            >
-              <p class="m-0 p-0">Supervisors</p>
-            </div>
-            <div class="vstack gap-2 py-2">
-              <div
-                v-for="supervisor in activitiesStore.activity.supervisors"
-                :key="supervisor.id"
-                class="border border-solid border-1 hstack gap-3 py-2 px-4"
-              >
-                <i class="bi bi-person-circle fs-3 opacity-50"></i>
-                <div>
-                  <p class="fw-bolder m-0">{{ supervisor.firstname }} {{ supervisor.lastname }}</p>
-                  <p class="fw-light m-0">{{ supervisor.email }}</p>
-                </div>
-                <i
-                  v-if="supervisor.id === activitiesStore.activity.creatorId"
-                  class="bi bi-star-fill ms-auto opacity-50"
-                ></i>
-              </div>
-            </div>
+          <div
+            v-if="userStore.loading || activitiesStore.loading"
+            class="spinner-border text-primary"
+            role="status"
+          >
+            <span class="visually-hidden">Loading...</span>
           </div>
-
-          <div v-if="updateSupervisors">
-            <div v-if="userStore.loading" class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <div v-if="!userStore.loading" class="vstack gap-2" style="height: 300px">
+          <div v-if="!userStore.loading && !activitiesStore.loading">
+            <div v-if="!updateState">
               <div
                 class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
               >
-                <p class="m-0">Change supervisors</p>
+                <p class="m-0 p-0">Supervisors</p>
               </div>
-              <div class="ps-1 overflow-auto">
-                <div class="form-check" v-for="user in userStore.users" :key="user.id">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    :id="user.id"
-                    :value="user.id"
-                    :checked="checkSupervisor(user.id)"
-                    :disabled="user.id === activitiesStore.activity.creatorId"
-                  />
-                  <label :for="user.id" class="form-check-label"
-                    ><div>
-                      <p class="fw-bolder m-0">{{ user.firstname }} {{ user.lastname }}</p>
-                      <p class="fw-light m-0">{{ user.email }}</p>
-                    </div>
-                  </label>
+              <div class="vstack gap-2 py-2">
+                <div
+                  v-for="supervisor in activity.supervisors"
+                  :key="supervisor.id"
+                  class="border border-solid border-1 hstack gap-3 py-2 px-4"
+                >
+                  <i class="bi bi-person-circle fs-5 opacity-50"></i>
+                  <div class="hstack gap-2">
+                    <p class="fw-bolder m-0">
+                      {{ supervisor.firstname }} {{ supervisor.lastname }}
+                    </p>
+                  </div>
+                  <i
+                    v-if="supervisor.id === activity.creatorId"
+                    class="bi bi-star-fill ms-auto opacity-50"
+                  ></i>
                 </div>
-                <div class="d-flex gap-2 justify-content-center mt-3">
-                  <button
-                    class="btn btn-outline-secondary"
-                    @click.prevent="updateSupervisors = false"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    class="btn btn-primary flex-fill"
-                    @click.prevent="updateSupervisors = false"
-                  >
-                    Confirm
-                  </button>
+              </div>
+            </div>
+
+            <div v-if="updateState">
+              <div class="vstack gap-2" style="height: 300px">
+                <div
+                  class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
+                >
+                  <p class="m-0">Supervisors</p>
+                </div>
+                <div class="ps-1 overflow-auto">
+                  <div class="form-check" v-for="user in userStore.users" :key="user.id">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      :id="user.id"
+                      :value="user.id"
+                      v-model="activity.supervisorsIds"
+                      :checked="activity.supervisorsIds.includes(user.id)"
+                      :disabled="user.id === activity.creatorId"
+                    />
+                    <label :for="user.id" class="form-check-label"
+                      ><div>
+                        <p class="fw-bolder m-0">{{ user.firstname }} {{ user.lastname }}</p>
+                        <p class="fw-light m-0">{{ user.email }}</p>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -100,126 +108,264 @@
         </div>
 
         <!-- Activity details -->
-        <div class="vstack col-4">
+        <div class="vstack col-7">
           <p class="m-0 mx-5 mb-2 pb-2 border-bottom border-solid border-1">Activity details</p>
-          <ActivityDetails :activity="activitiesStore.activity" />
-        </div>
-
-        <!-- Images -->
-        <div class="vstack col-2">
-          <p class="m-0 mb-2 pb-2 border-bottom border-solid border-1">Images</p>
-          <div v-if="uploadedImages.length" class="mt-3 mb-3">
-            <div v-for="(image, index) in uploadedImages" :key="index">
-              <div class="hstack gap-2 align-items-center mb-2">
-                <button
-                  v-if="updateSupervisors"
-                  class="btn btn-sm btn-outline-danger"
-                  @click="removeImage(index)"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-                <p class="m-0">{{ image.file.name }}</p>
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <p class="my-2 mb-3 p-0 opacity-50">This activity has no images</p>
-          </div>
-          <div v-if="updateSupervisors" class="mb-2">
-            <label for="imageInput" class="form-label">Upload images</label>
-            <input
-              ref="imageInput"
-              type="file"
-              class="form-control"
-              accept="image/*"
-              multiple
-              @change="handleImageChange"
-            />
-          </div>
-
-          <!-- Gallery modal -->
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#imageModal"
-          >
-            View image gallery
-          </button>
-          <div
-            class="modal fade"
-            id="imageModal"
-            tabindex="-1"
-            aria-labelledby="imageModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="imageModalLabel">Image gallery</h5>
-                  <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
+          <ActivityDetails v-if="!updateState" :activity="activitiesStore.activity" />
+          <div v-if="updateState" class="vstack gap-2 py-2 px-5">
+            <form class="vstack gap-2">
+              <div class="form-group">
+                <label for="theme">Theme*</label>
+                <input
+                  id="theme"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter activity theme"
+                  v-model="activity.theme"
+                />
+                <div v-for="error of v$.theme.$errors" :key="error.$uid">
+                  <div class="text-danger">{{ error.$message }}</div>
                 </div>
-                <div class="modal-body">
-                  <div
-                    id="carouselExampleIndicators"
-                    class="carousel slide"
-                    data-bs-interval="false"
-                  >
-                    <!-- Indicators -->
-                    <div class="carousel-indicators">
-                      <button
-                        v-for="(image, index) in uploadedImages"
-                        :key="index"
-                        :data-bs-target="'#carouselExampleIndicators'"
-                        :data-bs-slide-to="index"
-                        :class="{ active: index === 0 }"
-                        type="button"
-                      ></button>
-                    </div>
+              </div>
+              <div class="form-group">
+                <label for="name">Name*</label>
+                <input
+                  id="name"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter activity name"
+                  v-model="activity.name"
+                />
+                <div v-for="error of v$.name.$errors" :key="error.$uid">
+                  <div class="text-danger">{{ error.$message }}</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="location">Location*</label>
+                <input
+                  id="location"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter activity location"
+                  v-model="activity.location"
+                />
+                <div v-for="error of v$.location.$errors" :key="error.$uid">
+                  <div class="text-danger">{{ error.$message }}</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date*</label>
+                <input
+                  id="startDate"
+                  type="date"
+                  class="form-control"
+                  placeholder="Enter activity start date"
+                  v-model="activity.startDate"
+                />
+                <div v-for="error of v$.startDate.$errors" :key="error.$uid">
+                  <div class="text-danger">{{ error.$message }}</div>
+                </div>
+              </div>
 
-                    <!-- Slides -->
-                    <div class="carousel-inner">
-                      <div
-                        v-for="(image, index) in uploadedImages"
-                        :key="index"
-                        :class="{ 'carousel-item': true, active: index === 0 }"
-                      >
-                        <img :src="image.url" class="d-block w-100" :alt="image.alt" />
-                        <div class="carousel-caption d-none d-md-block">
-                          <div class="bg-dark opacity-75 p-0 rounded-3">
-                            <h5>{{ image.file.name }}</h5>
-                          </div>
-                        </div>
-                      </div>
+              <!-- optional fields -->
+              <div>
+                <div class="vstack gap-2" id="optional-fields">
+                  <div class="form-group">
+                    <label for="startDate">End Date</label>
+                    <input
+                      id="startDate"
+                      type="date"
+                      class="form-control"
+                      placeholder="Enter activity start date"
+                      v-model="activity.endDate"
+                    />
+                    <div v-for="error of v$.endDate.$errors" :key="error.$uid">
+                      <div class="text-danger">{{ error.$message }}</div>
                     </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="reason">Reason</label>
+                    <input
+                      id="reason"
+                      type="text"
+                      class="form-control"
+                      placeholder="Write a motive for the activity"
+                      v-model="activity.reason"
+                    />
+                  </div>
 
-                    <!-- Controls -->
-                    <a
-                      class="carousel-control-prev"
-                      href="#carouselExampleIndicators"
-                      role="button"
-                      data-bs-slide="prev"
-                    >
-                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                      <span class="visually-hidden">Previous</span>
-                    </a>
-                    <a
-                      class="carousel-control-next"
-                      href="#carouselExampleIndicators"
-                      role="button"
-                      data-bs-slide="next"
-                    >
-                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                      <span class="visually-hidden">Next</span>
-                    </a>
+                  <div class="form-group optional-field">
+                    <label for="goal">Goal</label>
+                    <input
+                      id="goal"
+                      type="text"
+                      class="form-control"
+                      placeholder="Write a goal for the activity"
+                      v-model="activity.goal"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="result">Result</label>
+                    <input
+                      id="result"
+                      type="text"
+                      class="form-control"
+                      placeholder="Write the result of the activity"
+                      v-model="activity.result"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="resources">Resources</label>
+                    <input
+                      id="resources"
+                      type="text"
+                      class="form-control"
+                      placeholder="Write the needed resources for the activity"
+                      v-model="activity.resources"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea
+                      id="notes"
+                      type="text"
+                      class="form-control"
+                      placeholder="Any extra notes..."
+                      rows="3"
+                      v-model="activity.notes"
+                    />
                   </div>
                 </div>
               </div>
+              <p>*Required fields</p>
+            </form>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="col col-3">
+          <div class="vstack">
+            <p class="m-0 mb-2 pb-2 border-bottom border-solid border-1">Images</p>
+            <div v-if="activity.images.length" class="mt-3 mb-3">
+              <div v-for="(image, index) in activity.images" :key="index">
+                <div class="hstack gap-2 align-items-center mb-2">
+                  <button
+                    v-if="updateState"
+                    class="btn btn-sm btn-outline-danger"
+                    @click="removeImage(index)"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <p class="m-0">{{ image.file ? image.file.name : image.originalName }}</p>
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              <p class="my-2 mb-3 p-0 opacity-50">This activity has no images</p>
+            </div>
+            <div v-if="updateState" class="mb-2">
+              <label for="imageInput" class="form-label">Upload images</label>
+              <input
+                ref="imageInput"
+                type="file"
+                class="form-control"
+                accept="image/*"
+                multiple
+                @change="handleImageChange"
+              />
+            </div>
+
+            <!-- Gallery modal -->
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#imageModal"
+              v-if="activity.images && activity.images.length > 0"
+            >
+              View image gallery
+            </button>
+            <div
+              class="modal fade"
+              id="imageModal"
+              tabindex="-1"
+              aria-labelledby="imageModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered modal-md">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Image gallery</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <div
+                      id="carouselExampleIndicators"
+                      class="carousel slide"
+                      data-bs-interval="false"
+                    >
+                      <!-- Indicators -->
+                      <div class="carousel-indicators">
+                        <button
+                          v-for="(image, index) in activity.images"
+                          :key="index"
+                          :data-bs-target="'#carouselExampleIndicators'"
+                          :data-bs-slide-to="index"
+                          :class="{ active: index === 0 }"
+                          type="button"
+                        ></button>
+                      </div>
+
+                      <!-- Slides -->
+                      <div class="carousel-inner">
+                        <div
+                          v-for="(image, index) in activity.images"
+                          :key="index"
+                          :class="{ 'carousel-item': true, active: index === 0 }"
+                        >
+                          <img
+                            :src="image.url ? image.url : image.filepath"
+                            class="d-block w-100"
+                            :alt="image.alt"
+                          />
+                          <div class="carousel-caption d-none d-md-block">
+                            <div class="bg-dark opacity-75 p-0 rounded-3">
+                              <h5>{{ image.file ? image.file.name : image.originalName }}</h5>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Controls -->
+                      <a
+                        class="carousel-control-prev"
+                        href="#carouselExampleIndicators"
+                        role="button"
+                        data-bs-slide="prev"
+                      >
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                      </a>
+                      <a
+                        class="carousel-control-next"
+                        href="#carouselExampleIndicators"
+                        role="button"
+                        data-bs-slide="next"
+                      >
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-danger" v-if="activitiesStore.error">
+              {{ activitiesStore.error }}
             </div>
           </div>
         </div>
@@ -229,36 +375,78 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { onBeforeMount, reactive, ref, unref, watchEffect } from 'vue'
 import { useActivitiesStore } from '../../stores/activities'
 import { useUserStore } from '../../stores/user'
 import { useRoute } from 'vue-router'
-import { onBeforeMount } from 'vue'
 import ActivityDetails from '../../components/ActivityDetails.vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, minValue, helpers } from '@vuelidate/validators'
 
 export default {
   components: { ActivityDetails },
   setup() {
-    const uploadedImages = ref([])
-    const updateSupervisors = ref(false)
+    // let uploadedImages = ref([])
+    const updateState = ref(false)
     const route = useRoute()
     const activitiesStore = useActivitiesStore()
     const userStore = useUserStore()
-    let supervisorsIds = []
+    let activity = reactive({
+      theme: '',
+      name: '',
+      location: '',
+      startDate: '',
+      endDate: '',
+      supervisorsIds: [],
+      images: [],
+      oldImagesIds: [],
+      reason: '',
+      goal: '',
+      result: '',
+      resources: '',
+      notes: ''
+    })
+
+    const rules = {
+      theme: { required: helpers.withMessage(`Theme cannot be empty`, required) },
+      name: { required: helpers.withMessage(`Name cannot be empty`, required) },
+      location: { required: helpers.withMessage(`Location cannot be empty`, required) },
+      startDate: {
+        required: helpers.withMessage(`Start date cannot be empty`, required),
+        minValue: helpers.withMessage(
+          'Start date must be after today',
+          (value) => new Date(value) > new Date()
+        )
+      },
+      endDate: {
+        minValue: helpers.withMessage(
+          'End date must be after or equal the start date',
+          (value, { startDate }) => new Date(value) >= new Date(startDate)
+        )
+      }
+    }
+
+    const v$ = useVuelidate(rules, activity)
+
+    const reasignToReactiveActivity = (fetchedActivity) => {
+      Object.entries(fetchedActivity).forEach(([key, value]) => (activity[key] = value))
+      activity.supervisorsIds = fetchedActivity.supervisors.map((s) => s.id)
+      // activity.oldImagesIds = fetchedActivity.images.map((i) => i.id)
+      activity.startDate = new Date(activity.startDate).toISOString().slice(0, 10)
+      activity.endDate = activity.endDate
+        ? new Date(activity.endDate).toISOString().slice(0, 10)
+        : null
+    }
 
     onBeforeMount(async () => {
       await activitiesStore.fetchActivity(route.params.activityId)
-      console.log(userStore.users)
-      if (!userStore.users) {
-        await userStore.getAllUsers()
-      }
-      supervisorsIds = activitiesStore.activity.supervisors.map((s) => s.id)
-      console.log(supervisorsIds.includes(58))
-      console.log(supervisorsIds.includes(60))
-      console.log(supervisorsIds.includes(582))
+      await userStore.getAllUsers()
+      reasignToReactiveActivity(activitiesStore.activity)
     })
 
-    const checkSupervisor = (userId) => supervisorsIds.includes(userId)
+    // watchEffect(() => {
+    //   console.log(activity.supervisorsIds)
+    // })
 
     const handleImageChange = (event) => {
       const files = Array.from(event.target.files)
@@ -266,21 +454,59 @@ export default {
         const imageUrl = URL.createObjectURL(file)
         return { file, url: imageUrl }
       })
-      uploadedImages.value.push(...newImages)
+      activity.images.push(...newImages)
     }
 
     const removeImage = (index) => {
-      uploadedImages.value.splice(index, 1)
+      activity.images.splice(index, 1)
+    }
+
+    const handleSave = async () => {
+      const isFormCorrect = await unref(v$).$validate()
+      if (!isFormCorrect) return
+
+      console.log(activity.images)
+      const activityFormData = new FormData()
+      Object.entries(activity).forEach(([key, value]) => activityFormData.append(`${key}`, value))
+      activityFormData.delete('supervisorsIds')
+      activityFormData.delete('oldImagesIds')
+      activityFormData.delete('images')
+      activityFormData.append('supervisorsIds', JSON.stringify(activity.supervisorsIds))
+      console.log(activity.oldImagesIds)
+      let oldImagesIds = activity.images.reduce(
+        (acc, image) => (image.filepath ? [...acc, image.id] : acc),
+        []
+      )
+      activityFormData.append('oldImagesIds', JSON.stringify(oldImagesIds))
+      activity.images.forEach((image) => {
+        activityFormData.append('images', image.file)
+      })
+
+      console.log(activityFormData)
+      await activitiesStore.updateActivity(activityFormData)
+
+      await activitiesStore.fetchActivity(route.params.activityId)
+      reasignToReactiveActivity(activitiesStore.activity)
+      updateState.value = false
+    }
+
+    const handleCancelEdit = async () => {
+      await activitiesStore.fetchActivity(route.params.activityId)
+      reasignToReactiveActivity(activitiesStore.activity)
+      updateState.value = false
     }
 
     return {
-      uploadedImages,
       userStore,
       activitiesStore,
       handleImageChange,
       removeImage,
-      checkSupervisor,
-      updateSupervisors
+      updateState,
+      activity,
+      v$,
+      handleCancelEdit,
+      handleSave
+      // handleSupervisorChange
     }
   }
 }

@@ -8,6 +8,15 @@ class Api {
       withCredentials: true,
       headers: { authorization: `Bearer ${VueCookies.get('jwt')}` }
     })
+
+    this.clientMultiPart = axios.create({
+      baseURL: 'https://cooperative-attire-goat.cyclic.app/api/v1' + baseURL,
+      withCredentials: true,
+      headers: {
+        authorization: `Bearer ${VueCookies.get('jwt')}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 
   async get(url) {
@@ -28,6 +37,10 @@ class Api {
 
   async patch(url, data = {}) {
     return await this.client.patch(url, data)
+  }
+
+  async patchWithImages(url, formData = {}) {
+    return await this.clientMultiPart.patch(url, formData)
   }
 }
 

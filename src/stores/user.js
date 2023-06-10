@@ -57,10 +57,7 @@ export const useUserStore = defineStore('user', {
         const userApi = new UsersApi()
         const res = await userApi.getAllUsers()
 
-        console.log(res)
-
         this.users = res.data.users
-        console.log(this.users)
       } catch (error) {
         console.log(error)
         this.error = error.response.data.message

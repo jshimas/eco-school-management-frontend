@@ -29,7 +29,6 @@ export const useActivitiesStore = defineStore('activity', {
       try {
         this.loading = true
         const userStore = useUserStore()
-        console.log(userStore.user.schoolId)
         const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
         const res = await activitiesApi.getActivityById(activityId)
         this.activity = res.data.activity
@@ -81,6 +80,22 @@ export const useActivitiesStore = defineStore('activity', {
 
         const res = await activitiesApi.createActivity(data)
         return await res.data
+      } catch (err) {
+        console.log(err)
+        this.error = err
+      } finally {
+        this.loading = false
+      }
+    },
+    async updateActivity(activity) {
+      try {
+        this.loading = true
+        const userStore = useUserStore()
+        const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
+
+        console.log('IN', activity)
+        const res = await activitiesApi.updateActivity(activity)
+        this.activity = res.data.activity
       } catch (err) {
         console.log(err)
         this.error = err
