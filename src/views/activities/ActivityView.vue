@@ -229,6 +229,7 @@
                       class="form-control"
                       placeholder="Enter activity start date"
                       v-model="activity.endDate"
+                      :disabled="disableEndDate"
                     />
                     <div v-for="error of v$.endDate.$errors" :key="error.$uid">
                       <div class="text-danger">{{ error.$message }}</div>
@@ -444,7 +445,8 @@ export default {
     const router = useRouter()
     const activitiesStore = useActivitiesStore()
     const userStore = useUserStore()
-    let disableStartDate
+    let disableStartDate = ref(false)
+    let disableEndDate = ref(false)
     let activity = reactive({
       theme: '',
       name: '',
@@ -470,7 +472,7 @@ export default {
         required: helpers.withMessage(`Start date cannot be empty`, required),
         minValue: helpers.withMessage(
           'Start date must be after today',
-          (value) => new Date(value) > new Date()
+          (value, { approved }) => new Date(value) > new Date() || disableStartDate.value
         )
       },
       endDate: {
@@ -496,7 +498,8 @@ export default {
       await activitiesStore.fetchActivity(route.params.activityId)
       await userStore.getAllUsers()
       reasignToReactiveActivity(activitiesStore.activity)
-      disableStartDate = activity.approved && new Date(activity.startDate) < new Date()
+      disableStartDate.value = activity.approved && new Date(activity.startDate) < new Date()
+      disableEndDate.value = activity.approved && new Date(activity.endDate) < new Date()
     })
 
     const handleImageChange = (event) => {
@@ -550,7 +553,8 @@ export default {
       v$,
       handleSave,
       router,
-      disableStartDate
+      disableStartDate,
+      disableEndDate
     }
   }
 }
