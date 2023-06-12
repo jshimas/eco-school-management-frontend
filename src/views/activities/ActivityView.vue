@@ -1,5 +1,19 @@
 <template>
   <div class="container mt-4 mb-5 d-flex flex-column align-items-center">
+    <router-link
+      class="align-self-start mb-4"
+      :to="{ name: 'schoolActivities', params: { schoolId: userStore.user.schoolId } }"
+    >
+      <!-- Button trigger modal -->
+      <button
+        type="button"
+        class="btn btn-light align-self-start"
+        data-bs-toggle="modal"
+        data-bs-target="#modal"
+      >
+        <i class="bi bi-arrow-left"></i> Back to activities
+      </button>
+    </router-link>
     <div
       v-if="activitiesStore.loading && updateState"
       class="spinner-border text-primary"
@@ -12,22 +26,46 @@
       <div class="mb-4">
         <h2 class="mb-0">{{ activity.name }}</h2>
         <div class="hstack gap-2">
-          <span class="badge rounded-pill bg-primary">{{ activity.theme }}</span>
-          <span v-if="activity.approved" class="badge rounded-pill bg-success">Approved</span>
-          <span v-else class="badge rounded-pill bg-secondary">Waiting for approval</span>
+          <span class="badge rounded-pill bg-primary" style="font-size: 16px">{{
+            activity.theme
+          }}</span>
+          <span
+            v-if="activity.approved"
+            class="badge rounded-pill bg-success"
+            style="font-size: 16px"
+          >
+            Approved</span
+          >
+          <span
+            v-if="!activity.approved"
+            class="badge rounded-pill bg-secondary"
+            style="font-size: 16px"
+            >Waiting for approval</span
+          >
+          <span
+            v-if="activity.approved && activity.endDate && new Date(activity.endDate) <= new Date()"
+            class="badge rounded-pill bg-dark"
+            style="font-size: 16px"
+          >
+            Finished</span
+          >
           <div class="ms-auto">
             <button
-              v-if="!updateState"
+              v-if="
+                (!updateState && activity.creatorId == userStore.user.id) || // permission to update for creator
+                (!updateState && ['admin', 'coordinator'].includes(userStore.user.role)) || // higher roles
+                (!updateState && activity.supervisorsIds.includes(userStore.user.id)) // if a user is a supervisor
+              "
               class="btn btn-outline-primary"
               @click.prevent="updateState = !updateState"
             >
               <i class="bi bi-pen"></i> Edit execution details
             </button>
-            <div v-else class="hstack gap-2">
+            <div v-if="updateState" class="hstack gap-2">
               <button
                 type="button"
                 class="btn btn-outline-secondary"
-                @click.prevent="handleCancelEdit"
+                @click.prevent="refreshPageData"
               >
                 <i class="bi bi-x-lg"></i> CANCEL
               </button>
@@ -50,7 +88,15 @@
             <span class="visually-hidden">Loading...</span>
           </div>
           <div v-if="!userStore.loading && !activitiesStore.loading">
-            <div v-if="!updateState">
+            <div
+              v-if="
+                !updateState ||
+                (updateState &&
+                  activity.supervisorsIds.includes(userStore.user.id) &&
+                  !['admin', 'coordinator'].includes(userStore.user.role) &&
+                  activity.creatorId != userStore.user.id)
+              "
+            >
               <div
                 class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
               >
@@ -76,7 +122,12 @@
               </div>
             </div>
 
-            <div v-if="updateState">
+            <div
+              v-if="
+                (updateState && activity.creatorId == userStore.user.id) || // permission to update for creator
+                (updateState && ['admin', 'coordinator'].includes(userStore.user.role)) // higher roles
+              "
+            >
               <div class="vstack gap-2" style="height: 300px">
                 <div
                   class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
@@ -160,6 +211,7 @@
                   class="form-control"
                   placeholder="Enter activity start date"
                   v-model="activity.startDate"
+                  :disabled="disableStartDate"
                 />
                 <div v-for="error of v$.startDate.$errors" :key="error.$uid">
                   <div class="text-danger">{{ error.$message }}</div>
@@ -378,7 +430,7 @@
 import { onBeforeMount, reactive, ref, unref, watchEffect } from 'vue'
 import { useActivitiesStore } from '../../stores/activities'
 import { useUserStore } from '../../stores/user'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ActivityDetails from '../../components/ActivityDetails.vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minValue, helpers } from '@vuelidate/validators'
@@ -389,8 +441,10 @@ export default {
     // let uploadedImages = ref([])
     const updateState = ref(false)
     const route = useRoute()
+    const router = useRouter()
     const activitiesStore = useActivitiesStore()
     const userStore = useUserStore()
+    let disableStartDate
     let activity = reactive({
       theme: '',
       name: '',
@@ -404,7 +458,8 @@ export default {
       goal: '',
       result: '',
       resources: '',
-      notes: ''
+      notes: '',
+      creatorId: ''
     })
 
     const rules = {
@@ -421,7 +476,7 @@ export default {
       endDate: {
         minValue: helpers.withMessage(
           'End date must be after or equal the start date',
-          (value, { startDate }) => new Date(value) >= new Date(startDate)
+          (value, { startDate }) => !value || new Date(value) >= new Date(startDate)
         )
       }
     }
@@ -431,7 +486,6 @@ export default {
     const reasignToReactiveActivity = (fetchedActivity) => {
       Object.entries(fetchedActivity).forEach(([key, value]) => (activity[key] = value))
       activity.supervisorsIds = fetchedActivity.supervisors.map((s) => s.id)
-      // activity.oldImagesIds = fetchedActivity.images.map((i) => i.id)
       activity.startDate = new Date(activity.startDate).toISOString().slice(0, 10)
       activity.endDate = activity.endDate
         ? new Date(activity.endDate).toISOString().slice(0, 10)
@@ -442,11 +496,8 @@ export default {
       await activitiesStore.fetchActivity(route.params.activityId)
       await userStore.getAllUsers()
       reasignToReactiveActivity(activitiesStore.activity)
+      disableStartDate = activity.approved && new Date(activity.startDate) < new Date()
     })
-
-    // watchEffect(() => {
-    //   console.log(activity.supervisorsIds)
-    // })
 
     const handleImageChange = (event) => {
       const files = Array.from(event.target.files)
@@ -457,43 +508,36 @@ export default {
       activity.images.push(...newImages)
     }
 
-    const removeImage = (index) => {
-      activity.images.splice(index, 1)
+    const removeImage = (index) => activity.images.splice(index, 1)
+
+    const refreshPageData = async () => {
+      await activitiesStore.fetchActivity(route.params.activityId)
+      reasignToReactiveActivity(activitiesStore.activity)
+      updateState.value = false
     }
 
     const handleSave = async () => {
       const isFormCorrect = await unref(v$).$validate()
       if (!isFormCorrect) return
 
-      console.log(activity.images)
       const activityFormData = new FormData()
-      Object.entries(activity).forEach(([key, value]) => activityFormData.append(`${key}`, value))
-      activityFormData.delete('supervisorsIds')
-      activityFormData.delete('oldImagesIds')
+      Object.entries(activity).forEach(
+        ([key, value]) => value && activityFormData.append(`${key}`, value)
+      )
       activityFormData.delete('images')
-      activityFormData.append('supervisorsIds', JSON.stringify(activity.supervisorsIds))
-      console.log(activity.oldImagesIds)
+      activityFormData.set('supervisorsIds', JSON.stringify(activity.supervisorsIds))
       let oldImagesIds = activity.images.reduce(
         (acc, image) => (image.filepath ? [...acc, image.id] : acc),
         []
       )
-      activityFormData.append('oldImagesIds', JSON.stringify(oldImagesIds))
+      activityFormData.set('oldImagesIds', JSON.stringify(oldImagesIds))
       activity.images.forEach((image) => {
         activityFormData.append('images', image.file)
       })
 
-      console.log(activityFormData)
       await activitiesStore.updateActivity(activityFormData)
 
-      await activitiesStore.fetchActivity(route.params.activityId)
-      reasignToReactiveActivity(activitiesStore.activity)
-      updateState.value = false
-    }
-
-    const handleCancelEdit = async () => {
-      await activitiesStore.fetchActivity(route.params.activityId)
-      reasignToReactiveActivity(activitiesStore.activity)
-      updateState.value = false
+      await refreshPageData()
     }
 
     return {
@@ -504,9 +548,9 @@ export default {
       updateState,
       activity,
       v$,
-      handleCancelEdit,
-      handleSave
-      // handleSupervisorChange
+      handleSave,
+      router,
+      disableStartDate
     }
   }
 }

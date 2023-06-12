@@ -1,10 +1,10 @@
 <template>
   <div class="container mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card">
           <div class="card-header">
-            <h4>Login</h4>
+            <h4>Login to Owly app</h4>
           </div>
           <div class="card-body">
             <form @submit.prevent="login">
@@ -38,11 +38,13 @@
                 <div class="text-danger" v-if="userStore.error">
                   {{ userStore.error }}
                 </div>
-                <div v-if="userStore.loading" class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                <div class="d-flex justify-content-center mt-2">
+                  <div v-if="userStore.loading" class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
                 </div>
-                <div v-else class="form-group">
-                  <button type="submit" class="btn btn-primary mt-2">Login</button>
+                <div v-if="!userStore.loading" class="form-group">
+                  <button type="submit" class="btn btn-primary mt-2 w-100">Login</button>
                 </div>
               </div>
             </form>

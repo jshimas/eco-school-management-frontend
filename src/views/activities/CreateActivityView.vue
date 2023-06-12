@@ -1,8 +1,18 @@
 <template>
   <div class="container mt-5 mb-5 d-flex flex-column align-items-center">
+    <router-link
+      class="col-md-6 p-0 m-0"
+      :to="{ name: 'schoolActivities', params: { schoolId: route.params.schoolId } }"
+    >
+      <!-- Button trigger modal -->
+      <button v-if="!activityChanged" type="button" class="btn btn-light align-self-start">
+        <i class="bi bi-arrow-left"></i> Back to activities
+      </button>
+    </router-link>
     <div class="col-md-6 p-0 m-0">
       <!-- Button trigger modal -->
       <button
+        v-if="activityChanged"
         type="button"
         class="btn btn-light align-self-start"
         data-bs-toggle="modal"
@@ -199,7 +209,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, unref } from 'vue'
+import { onBeforeMount, reactive, unref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActivitiesStore } from '../../stores/activities'
 import { useUserStore } from '../../stores/user'
@@ -222,6 +232,18 @@ const activity = reactive({
   resources: '',
   notes: ''
 })
+
+const activityChanged = ref(false)
+for (const key in activity) {
+  watch(
+    () => activity[key],
+    (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        activityChanged.value = true
+      }
+    }
+  )
+}
 
 const rules = {
   theme: { required: helpers.withMessage(`Theme cannot be empty`, required) },
@@ -247,11 +269,9 @@ const createActivity = async () => {
   const isFormCorrect = await unref(v$).$validate()
   if (!isFormCorrect) return
 
-  await activitiesStore.createActivity(activity)
+  await await activitiesStore.createActivity(activity)
   await activitiesStore.fetchUserActivities()
-  if (!activitiesStore.error) {
-    router.push({ name: 'schoolActivities', params: { schoolId: route.params.schoolId } })
-  }
+  router.push({ name: 'schoolActivities', params: { schoolId: route.params.schoolId } })
 }
 
 const handleReturn = () => {

@@ -1,5 +1,5 @@
 <template>
-  <header v-if="$route.path !== '/login'">
+  <header v-if="!$route.meta.hideNavbar">
     <Navbar />
   </header>
   <RouterView />

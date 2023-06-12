@@ -57,7 +57,7 @@ export default {
   setup() {
     const formatDate = (stringDate) => {
       const date = new Date(stringDate)
-      return date.toLocaleString('en-US')
+      return date.toLocaleString('lt-LT').split(' ')[0]
     }
     return {
       formatDate

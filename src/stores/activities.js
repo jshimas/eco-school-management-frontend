@@ -114,7 +114,10 @@ export const useActivitiesStore = defineStore('activity', {
     },
     inProgress() {
       return this.activities.filter((a) => {
-        return new Date(a.startDate) < new Date() && !a.endDate
+        return (
+          (new Date(a.startDate) < new Date() && a.approved) ||
+          (a.endDate && new Date(a.endDate) <= new Date())
+        )
       })
     },
     planned() {

@@ -113,12 +113,8 @@ export default {
     const filter = ref('approved')
 
     onBeforeMount(async () => {
-      if (!activitiesStore.activities) {
-        await activitiesStore.fetchUserActivities()
-      }
-      if (!projectStore.school) {
-        await projectStore.fetchUserProject()
-      }
+      await activitiesStore.fetchUserActivities()
+      await projectStore.fetchUserProject()
     })
 
     return {

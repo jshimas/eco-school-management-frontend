@@ -12,10 +12,10 @@
       </thead>
       <tbody class="table-group-divider">
         <tr
-          v-for="activity in activities"
+          v-for="activity in sortByStartDate(activities)"
           :key="activity.id"
-          class="clickable-row"
-          @click="navigateToActivity(activity.id)"
+          :class="{ 'clickable-row': !withActions }"
+          @click="!withActions && navigateToActivity(activity.id)"
         >
           <td>{{ activity.theme }}</td>
           <td>{{ activity.name }}</td>
@@ -23,6 +23,12 @@
           <td>{{ getStateName(activity) }}</td>
           <td v-if="withActions && userStore.user.role !== 'member'">
             <div class="hstack gap-2">
+              <button
+                class="btn btn-sm btn-outline-primary mr-2"
+                @click="navigateToActivity(activity.id)"
+              >
+                <i class="bi bi-pen"></i> Edit
+              </button>
               <button
                 class="btn btn-sm btn-outline-success mr-2"
                 @click="activitiesStore.approveActivity(activity.id)"
@@ -60,14 +66,14 @@ export default {
 
     function getStateName(activity) {
       if (!activity.approved) return 'pending'
-      else if (new Date(activity.startDate) > new Date() && !activity.endDate) return 'planned'
-      else if (activity.endDate) return 'finished'
+      else if (activity.approved && new Date(activity.startDate) > new Date()) return 'planned'
+      else if (activity.endDate && new Date(activity.endDate) < new Date()) return 'finished'
       else return 'in progress'
     }
 
     function formatDate(stringDate) {
       const date = new Date(stringDate)
-      return date.toLocaleString('en-US')
+      return date.toLocaleString('lt-LT').split(' ')[0]
     }
 
     function navigateToActivity(activityId) {
@@ -77,12 +83,19 @@ export default {
       })
     }
 
+    function sortByStartDate(activities) {
+      return activities.sort((a, b) =>
+        a.startDate > b.startDate ? 1 : a.startDate < b.startDate ? -1 : 0
+      )
+    }
+
     return {
       activitiesStore,
       formatDate,
       getStateName,
       userStore,
-      navigateToActivity
+      navigateToActivity,
+      sortByStartDate
     }
   }
 }

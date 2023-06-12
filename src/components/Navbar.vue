@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-expand-sm bg-body-tertiary" data-bs-theme="dark">
-    <div class="container-fluid">
+    <div class="container-fluid" v-if="!userStore.loading && userStore.user">
       <a class="navbar-brand" href="#">Navbar</a>
       <button
         class="navbar-toggler"
@@ -14,7 +14,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul v-if="userStore.user" class="navbar-nav">
+        <ul class="navbar-nav">
           <li class="nav-item">
             <router-link
               class="nav-link"
@@ -43,7 +43,14 @@
               >Profile</router-link
             >
           </li>
+          <li class="nav-item" v-if="['admin', 'coordinator'].includes(userStore.user.role)">
+            <router-link class="nav-link" :to="{ name: 'users' }">Users</router-link>
+          </li>
         </ul>
+      </div>
+      <div class="ms-auto me-4">
+        {{ upperCase(userStore.user.role) }} | {{ userStore.user.firstname }}
+        {{ userStore.user.lastname }}
       </div>
       <form @submit="logout">
         <button class="btn btn-outline-light" type="submit">Logout</button>
@@ -55,6 +62,7 @@
 <script>
 import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
+import { onBeforeMount } from 'vue'
 
 export default {
   name: 'Navbar',
@@ -62,14 +70,21 @@ export default {
     const userStore = useUserStore()
     const router = useRouter()
 
+    onBeforeMount(async () => {
+      await userStore.getMe()
+    })
+
     const logout = async () => {
       await userStore.logout()
       router.push('/login')
     }
 
+    const upperCase = (string) => string.toUpperCase()
+
     return {
       logout,
-      userStore
+      userStore,
+      upperCase
     }
   }
 }

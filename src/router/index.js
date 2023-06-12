@@ -9,6 +9,9 @@ import MeetingsView from '../views/meetings/MeetingsView.vue'
 import UserProfileView from '../views/users/UserProfileView.vue'
 import CreateActivityView from '../views/activities/CreateActivityView.vue'
 import ActivityView from '../views/activities/ActivityView.vue'
+import CreateUserView from '../views/users/CreateUserView.vue'
+import UsersView from '../views/users/UsersView.vue'
+import CreatePasswordView from '../views/users/CreatePasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +25,18 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: LoginView
+      component: LoginView,
+      meta: {
+        hideNavbar: true
+      }
+    },
+    {
+      path: '/users/create-password',
+      name: 'createPassword',
+      component: CreatePasswordView,
+      meta: {
+        hideNavbar: true
+      }
     },
     {
       path: '/users/:userId',
@@ -58,6 +72,18 @@ const router = createRouter({
       path: '/schools/:schoolId/activities/:activityId',
       name: 'activity',
       component: ActivityView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UsersView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users/create',
+      name: 'createUser',
+      component: CreateUserView,
       meta: { requiresAuth: true }
     }
   ]

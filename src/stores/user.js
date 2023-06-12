@@ -37,9 +37,9 @@ export const useUserStore = defineStore('user', {
     },
 
     async getMe() {
+      if (!VueCookies.isKey('jwt')) return
       try {
         this.loading = true
-
         const userApi = new UsersApi()
         const res = await userApi.getCurrentUser()
         this.user = res.data.user
@@ -50,6 +50,7 @@ export const useUserStore = defineStore('user', {
         this.loading = false
       }
     },
+
     async getAllUsers() {
       try {
         this.loading = true
@@ -61,6 +62,35 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         console.log(error)
         this.error = error.response.data.message
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createUser(data) {
+      try {
+        this.loading = true
+
+        const userApi = new UsersApi()
+        const res = await userApi.createUser(data)
+      } catch (error) {
+        console.log(error)
+        this.error = error.response.data.message
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createUserPassword(token, data) {
+      try {
+        this.loading = true
+        this.error = null
+        const userApi = new UsersApi()
+        const res = await userApi.createUserPassword(token, data)
+        console.log(res)
+      } catch (error) {
+        console.log(error)
+        this.error = error
       } finally {
         this.loading = false
       }
