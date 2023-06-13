@@ -24,6 +24,8 @@ class Api {
   }
 
   async post(url, data = {}) {
+    console.log(data);
+    console.log(url);
     return await this.client.post(url, data)
   }
 

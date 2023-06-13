@@ -5,7 +5,7 @@ class MeetingsApi extends Api {
 		super("/meetings"); // Set the appropriate base URL for meetings endpoint
 	}
 
-	static async getAllMeetings() {
+	async getAllMeetings() {
 		return await this.get();
 	}
 
