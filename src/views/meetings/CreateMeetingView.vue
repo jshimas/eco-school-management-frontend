@@ -201,7 +201,7 @@ const createmeeting = async () => {
   const isFormCorrect = await unref(v$).$validate()
   if (!isFormCorrect) return
 
-  meeting.startTime = meeting.date + 'T' + meeting.startTime;
+  meeting.startTime = meeting.date + 'T' + meeting.startTime + ":00.000Z";
 
   console.log(meeting);
 
