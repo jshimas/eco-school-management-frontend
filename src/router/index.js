@@ -13,6 +13,7 @@ import CreateUserView from '../views/users/CreateUserView.vue'
 import UsersView from '../views/users/UsersView.vue'
 import CreatePasswordView from '../views/users/CreatePasswordView.vue'
 import CreateMeetingsView from '../views/meetings/CreateMeetingView.vue'
+import MeetingView from '../views/meetings/MeetingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -67,6 +68,12 @@ const router = createRouter({
       path: '/schools/:schoolId/meetings/create',
       name: 'createMeeting',
       component: CreateMeetingsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/schools/:schoolId/meetings/:meetingId',
+      name: 'meeting',
+      component: MeetingView,
       meta: { requiresAuth: true }
     },
     {
