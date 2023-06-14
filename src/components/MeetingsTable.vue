@@ -42,12 +42,14 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
 export default {
   name: 'AMeetingsTable',
   props: ['meetings', 'withActions', 'message'],
   setup() {
     const router = useRouter()
+    const userStore = useUserStore()
 
     function formatDate(stringDate) {
       const date = new Date(stringDate)
