@@ -3,8 +3,10 @@ import VueCookies from 'vue-cookies'
 
 class Api {
   constructor(baseURL) {
+    this.devolopmentURL = 'http://127.0.0.1:8080/api/v1'
+    this.deployedURL = 'https://cooperative-attire-goat.cyclic.app/api/v1'
     this.client = axios.create({
-      baseURL: 'https://cooperative-attire-goat.cyclic.app/api/v1' + baseURL,
+      baseURL: this.devolopmentURL + baseURL,
       withCredentials: true,
       headers: { authorization: `Bearer ${VueCookies.get('jwt')}` }
     })
@@ -24,8 +26,8 @@ class Api {
   }
 
   async post(url, data = {}) {
-    console.log(data);
-    console.log(url);
+    console.log(data)
+    console.log(url)
     return await this.client.post(url, data)
   }
 
