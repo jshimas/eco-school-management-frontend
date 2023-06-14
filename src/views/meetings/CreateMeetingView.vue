@@ -201,6 +201,8 @@ const createmeeting = async () => {
   const isFormCorrect = await unref(v$).$validate()
   if (!isFormCorrect) return
 
+  meeting.startTime = meeting.date + 'T' + meeting.startTime;
+
   console.log(meeting);
 
   await meetingsStore.createMeeting(meeting)
