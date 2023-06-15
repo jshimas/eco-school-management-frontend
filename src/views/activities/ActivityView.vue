@@ -554,7 +554,8 @@ export default {
       handleSave,
       router,
       disableStartDate,
-      disableEndDate
+      disableEndDate,
+      refreshPageData
     }
   }
 }
