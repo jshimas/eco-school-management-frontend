@@ -28,7 +28,9 @@
         <div class="hstack gap-2">
           <div class="ms-auto">
             <button
-              v-if="!updateState && ifPermissions"
+              v-if="!updateState && meetingsStore.meeting.participants.find(
+        (participant) => participant.id === this.userStore.user.id
+      ).permissions.editor"
               class="btn btn-outline-primary"
               @click.prevent="updateState = !updateState"
             >
@@ -61,7 +63,9 @@
             <span class="visually-hidden">Loading...</span>
           </div>
           <div v-if="!userStore.loading && !meetingsStore.loading">
-            <div v-if="!updateState || (!updateState && ifPermissions)">
+            <div v-if="!updateState || (!updateState && meetingsStore.meeting.participants.find(
+        (participant) => participant.id === this.userStore.user.id
+      ).permissions.editor)">
               <div
                 class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
               >
@@ -118,7 +122,9 @@
             </div>
           </div>
           <div v-if="!userStore.loading && !meetingsStore.loading">
-            <div v-if="!updateState || (!updateState && ifPermissions)">
+            <div v-if="!updateState || (!updateState && meetingsStore.meeting.participants.find(
+        (participant) => participant.id === this.userStore.user.id
+      ).permissions.editor)">
               <div
                 class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
               >

@@ -18,7 +18,7 @@ class MeetingsApi extends Api {
 	}
 
 	async updateMeetingById(meeting, data) {
-		return await this.patch(`/${meeting.get('id')}`, data);
+		return await this.patchWithImages(`/${meeting.get('id')}`, data);
 	}
 }
 
