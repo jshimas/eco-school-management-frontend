@@ -525,7 +525,7 @@ export default {
 
       const activityFormData = new FormData()
       Object.entries(activity).forEach(
-        ([key, value]) => value && activityFormData.append(`${key}`, value)
+        ([key, value]) => value === null && activityFormData.append(`${key}`, value)
       )
       activityFormData.delete('images')
       activityFormData.set('supervisorsIds', JSON.stringify(activity.supervisorsIds))

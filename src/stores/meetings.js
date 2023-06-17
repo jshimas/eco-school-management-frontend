@@ -30,7 +30,6 @@ export const useMeetingsStore = defineStore('meeting', {
         this.loading = true
         const meetingsApi = new MeetingsApi()
         const res = await meetingsApi.getMeetingById(meetingId)
-        this.meetings = res.data.meetings
         this.meeting = res.data.meeting
       } catch (err) {
         console.log(err)
@@ -56,7 +55,7 @@ export const useMeetingsStore = defineStore('meeting', {
       try {
         this.loading = true
         const meetingsApi = new MeetingsApi()
-        const res = await meetingsApi.updateMeeting(meeting)
+        const res = await meetingsApi.updateMeetingById(meeting)
 
       } catch (err) {
         console.log(err)

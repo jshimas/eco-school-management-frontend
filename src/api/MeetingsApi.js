@@ -12,6 +12,14 @@ class MeetingsApi extends Api {
 	async createMeeting(data) {
 		return await this.post("", data);
 	}
+
+	async getMeetingById(meetingId) {
+		return await this.get(`/${meetingId}`);
+	}
+
+	async updateMeetingById(meeting, data) {
+		return await this.patch(`/${meeting.get('id')}`, data);
+	}
 }
 
 export default MeetingsApi;
