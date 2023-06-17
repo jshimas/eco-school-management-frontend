@@ -13,13 +13,8 @@ class UsersApi extends Api {
     return await this.get(`/${id}`)
   }
 
-  async updateUser({ userId, roleId, schoolId, firstname, lastname }) {
-    return await this.patch(`/${userId}`, {
-      roleId,
-      schoolId,
-      firstname,
-      lastname
-    })
+  async updateUser(userId, data) {
+    return await this.update(`/${userId}`, data)
   }
 
   async getAllUsers() {

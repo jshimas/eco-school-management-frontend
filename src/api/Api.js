@@ -36,7 +36,7 @@ class Api {
   }
 
   async update(url, data = {}) {
-    return await this.client.update(url, data)
+    return await this.client.put(url, data)
   }
 
   async patch(url, data = {}) {

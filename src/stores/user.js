@@ -81,6 +81,21 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    async updateUser(userId, data) {
+      try {
+        this.loading = true
+
+        const userApi = new UsersApi()
+        const res = await userApi.updateUser(userId, data)
+
+      } catch (error) {
+        console.log(error)
+        this.error = error.response.data.message
+      } finally {
+        this.loading = false
+      }
+    },
+
     async createUserPassword(token, data) {
       try {
         this.loading = true
