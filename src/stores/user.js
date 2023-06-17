@@ -6,7 +6,8 @@ const defaultState = {
   user: null,
   loading: false,
   error: null,
-  users: null
+  users: null,
+  userEdit: null
 }
 
 export const useUserStore = defineStore('user', {
@@ -109,6 +110,20 @@ export const useUserStore = defineStore('user', {
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+    async getUserById(userId) {
+      try {
+        this.loading = true
+        const userApi = new UsersApi()
+        const res = await userApi.getUserById(userId)
+        this.userEdit = res.data.user
+      } catch (error) {
+        console.log(error)
+        this.error = error.response.data.message
+      } finally {
+        this.loading = false
+      }
+    },
+  },
+  
 })

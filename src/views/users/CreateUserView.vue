@@ -185,6 +185,7 @@ const v$ = useVuelidate(rules, user)
 
 onBeforeMount(async () => {
   await projectStore.fetchAllProjects()
+  
 })
 
 const createUser = async () => {
