@@ -88,9 +88,14 @@
         :message="'No pending actions at the moment'"
       />
     </div>
-    <router-link :to="{ name: 'createActivity' }">
-      <button class="btn btn-success"><i class="bi bi-plus"></i> Create activity</button>
-    </router-link>
+    <div class="d-flex justify-content-between">
+      <router-link :to="{ name: 'createActivity' }">
+        <button class="btn btn-success"><i class="bi bi-plus"></i> Create activity</button>
+      </router-link>
+      <router-link :to="{ name: 'activitiesReport' }" v-if="userStore.user.role !== 'member'">
+        <button class="btn btn-light">Prepare report</button>
+      </router-link>
+    </div>
   </div>
 </template>
 

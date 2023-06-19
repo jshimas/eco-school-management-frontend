@@ -122,6 +122,11 @@ export const useActivitiesStore = defineStore('activity', {
     },
     planned() {
       return this.activities.filter((a) => a.approved && new Date(a.startDate) > new Date())
+    },
+    finished() {
+      return this.activities.filter(
+        (a) => a.approved && a.endDate && new Date(a.endDate) < new Date()
+      )
     }
   }
 })
