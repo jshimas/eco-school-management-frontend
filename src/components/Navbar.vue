@@ -1,7 +1,11 @@
 <template>
   <nav class="navbar navbar-expand-sm bg-body-tertiary" data-bs-theme="dark">
     <div class="container-fluid" v-if="!userStore.loading && userStore.user">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <router-link
+        class="navbar-brand text-uppercase"
+        :to="{ name: 'schoolProject', params: { schoolId: userStore.user.schoolId } }"
+        >owly</router-link
+      >
       <button
         class="navbar-toggler"
         type="button"
@@ -15,13 +19,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item">
-            <router-link
-              class="nav-link"
-              :to="{ name: 'schoolProject', params: { schoolId: userStore.user.schoolId } }"
-              >Project</router-link
-            >
-          </li>
+          <li class="nav-item"></li>
           <li class="nav-item">
             <router-link
               class="nav-link"

@@ -6,6 +6,7 @@
           <th class="fw-bold">Theme</th>
           <th class="fw-bold">Activity</th>
           <th class="fw-bold">Start date</th>
+          <th class="fw-bold">End date</th>
           <th class="fw-bold">State</th>
           <th class="fw-bold" v-if="withActions && userStore.user.role !== 'member'">Actions</th>
         </tr>
@@ -20,6 +21,7 @@
           <td>{{ activity.theme }}</td>
           <td>{{ activity.name }}</td>
           <td>{{ formatDate(activity.startDate) }}</td>
+          <td>{{ activity.endDate ? formatDate(activity.endDate) : '-' }}</td>
           <td>{{ getStateName(activity) }}</td>
           <td v-if="withActions && userStore.user.role !== 'member'">
             <div class="hstack gap-2">
@@ -84,9 +86,7 @@ export default {
     }
 
     function sortByStartDate(activities) {
-      return activities.sort((a, b) =>
-        a.startDate > b.startDate ? 1 : a.startDate < b.startDate ? -1 : 0
-      )
+      return activities.sort((a, b) => (a.endDate > b.endDate ? 1 : a.endDate < b.endDate ? -1 : 0))
     }
 
     return {

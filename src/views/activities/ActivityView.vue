@@ -277,7 +277,9 @@
                     />
                   </div>
                   <div class="form-group">
-                    <label for="notes">Notes</label>
+                    <div class="hstack">
+                      <label for="notes">Notes</label>
+                    </div>
                     <textarea
                       id="notes"
                       type="text"
@@ -428,7 +430,7 @@
 </template>
 
 <script>
-import { onBeforeMount, reactive, ref, unref, watchEffect } from 'vue'
+import { onBeforeMount, reactive, ref, unref, watch } from 'vue'
 import { useActivitiesStore } from '../../stores/activities'
 import { useUserStore } from '../../stores/user'
 import { useRoute, useRouter } from 'vue-router'
@@ -448,6 +450,7 @@ export default {
     let disableStartDate = ref(false)
     let disableEndDate = ref(false)
     let activity = reactive({
+      id: '',
       theme: '',
       name: '',
       location: '',
@@ -483,6 +486,10 @@ export default {
       }
     }
 
+    watch(activity, (newValue) => {
+      if (!activity.reason) activity.reason = ''
+    })
+
     const v$ = useVuelidate(rules, activity)
 
     const reasignToReactiveActivity = (fetchedActivity) => {
@@ -499,7 +506,8 @@ export default {
       await userStore.getAllUsers()
       reasignToReactiveActivity(activitiesStore.activity)
       disableStartDate.value = activity.approved && new Date(activity.startDate) < new Date()
-      disableEndDate.value = activity.approved && new Date(activity.endDate) < new Date()
+      disableEndDate.value =
+        activity.approved && activity.endDate && new Date(activity.endDate) < new Date()
     })
 
     const handleImageChange = (event) => {
@@ -520,12 +528,14 @@ export default {
     }
 
     const handleSave = async () => {
+      console.log(activity)
       const isFormCorrect = await unref(v$).$validate()
       if (!isFormCorrect) return
 
+      // console.log(activity)
       const activityFormData = new FormData()
       Object.entries(activity).forEach(
-        ([key, value]) => value === null && activityFormData.append(`${key}`, value)
+        ([key, value]) => value && activityFormData.append(`${key}`, value)
       )
       activityFormData.delete('images')
       activityFormData.set('supervisorsIds', JSON.stringify(activity.supervisorsIds))
@@ -538,10 +548,13 @@ export default {
         activityFormData.append('images', image.file)
       })
 
+      console.log(activityFormData)
       await activitiesStore.updateActivity(activityFormData)
 
       await refreshPageData()
     }
+
+    const clearReason = () => (activity.reason = '')
 
     return {
       userStore,
@@ -555,7 +568,8 @@ export default {
       router,
       disableStartDate,
       disableEndDate,
-      refreshPageData
+      refreshPageData,
+      clearReason
     }
   }
 }

@@ -11,7 +11,7 @@
       </p>
     </div>
     <div v-if="activity.reason" class="col">
-      <p class="fs-6 fw-bold mb-0 text-secondary text-uppercase">Motive</p>
+      <p class="fs-6 fw-bold mb-0 text-secondary text-uppercase">Reason</p>
       <p class="fs-6 m-0">
         {{ activity.reason }}
       </p>

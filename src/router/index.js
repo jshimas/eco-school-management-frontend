@@ -125,7 +125,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  if (to.name !== 'login' && !userStore.user) {
+  if (to.name !== 'login' && to.name !== 'createPassword' && !userStore.user) {
     await userStore.getMe()
     if (!userStore.user) {
       next({ name: 'login' })
