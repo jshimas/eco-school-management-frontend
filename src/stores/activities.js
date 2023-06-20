@@ -92,8 +92,6 @@ export const useActivitiesStore = defineStore('activity', {
         this.loading = true
         const userStore = useUserStore()
         const activitiesApi = new ActivitiesApi(userStore.user.schoolId)
-
-        console.log('IN', activity)
         const res = await activitiesApi.updateActivity(activity)
         this.activity = res.data.activity
       } catch (err) {

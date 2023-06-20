@@ -72,9 +72,7 @@ export default {
     const activities = ref([])
 
     function markImage(activity, index) {
-      console.log('BOO')
       activity.images[index].marked = !activity.images[index].marked
-      console.log(activity.images[index].marked)
     }
 
     function showMarkedImages(activity) {
@@ -101,7 +99,6 @@ export default {
       await activitiesStore.fetchUserActivities()
       await userStore.getMe()
       activities.value = activitiesStore.finished
-      console.log(activities.value)
     })
 
     return {

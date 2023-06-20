@@ -24,37 +24,97 @@
 
     <div v-if="!meetingsStore.loading" class="col-12">
       <div class="mb-4">
-        <h2 class="mb-0">{{ meetingsStore.meeting.subject }}</h2>
-        <div class="hstack gap-2">
-          <div class="ms-auto">
+        <span
+          v-if="!meeting.endTime && new Date(meeting.startTime) > new Date()"
+          class="badge rounded-pill bg-warning"
+          >To be held</span
+        >
+        <span
+          v-if="!meeting.endTime && new Date(meeting.startTime) <= new Date()"
+          class="badge rounded-pill bg-success"
+          >In progress</span
+        >
+        <span v-if="meeting.endTime" class="badge rounded-pill bg-dark">Finished</span>
+        <div class="hstack gap-3">
+          <h2 class="mb-0">{{ meeting.subject }}</h2>
+
+          <!-- Finish and edit details buttons -->
+          <div
+            class="ms-auto hstack gap-2"
+            v-if="!updateState && !meeting.endTime && userWithPermissions"
+          >
             <button
-              v-if="!updateState && meetingsStore.meeting.participants.find(
-        (participant) => participant.id === this.userStore.user.id
-      ).permissions.editor"
-              class="btn btn-outline-primary"
-              @click.prevent="updateState = !updateState"
+              v-if="new Date(meeting.startTime) <= new Date()"
+              type="button"
+              class="btn btn-outline-success"
+              data-bs-toggle="modal"
+              data-bs-target="#finishMeetingModal"
             >
+              <i class="bi bi-check-all"></i> FINISH
+            </button>
+            <div
+              class="modal fade"
+              id="finishMeetingModal"
+              tabindex="-1"
+              aria-labelledby="finishMeetingModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="finishMeetingModalLabel">
+                      Are you sure you want to finish the meeting?
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    After finishing the meeting you won't be able to edit it.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      Close
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      data-bs-dismiss="modal"
+                      @click.prevent="handleFinish"
+                    >
+                      Finish it
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary" @click.prevent="updateState = !updateState">
               <i class="bi bi-pen"></i> Edit details
             </button>
-            <div v-if="updateState" class="hstack gap-2">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                @click.prevent="refreshPageData"
-              >
-                <i class="bi bi-x-lg"></i> CANCEL
-              </button>
-              <button type="button" class="btn btn-success" @click.prevent="handleSave">
-                <i class="bi bi-save"></i> SAVE
-              </button>
-            </div>
+          </div>
+
+          <!-- Cancel and save buttons -->
+          <div v-if="updateState" class="hstack gap-2 ms-auto">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              @click.prevent="refreshPageData"
+            >
+              <i class="bi bi-x-lg"></i> CANCEL
+            </button>
+            <button type="button" class="btn btn-success" @click.prevent="handleSave">
+              <i class="bi bi-save"></i> SAVE
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="row g-2">
-        <!-- supervisors -->
-        <div class="vstack col-2">
+      <div class="row g-1">
+        <!-- participants -->
+        <div class="vstack col-2 gap-3">
           <div
             v-if="userStore.loading || meetingsStore.loading"
             class="spinner-border text-primary"
@@ -63,9 +123,7 @@
             <span class="visually-hidden">Loading...</span>
           </div>
           <div v-if="!userStore.loading && !meetingsStore.loading">
-            <div v-if="!updateState || (!updateState && meetingsStore.meeting.participants.find(
-        (participant) => participant.id === this.userStore.user.id
-      ).permissions.editor)">
+            <div v-if="!updateState">
               <div
                 class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
               >
@@ -73,9 +131,9 @@
               </div>
               <div class="vstack gap-2 py-2">
                 <div
-                  v-for="participant in meetingsStore.meeting.participants"
+                  v-for="participant in meeting.participants"
                   :key="participant.id"
-                  class="border border-solid border-1 hstack gap-3 py-2 px-4"
+                  class="border border-solid border-1 hstack gap-3 py-2 px-3"
                 >
                   <i class="bi bi-person-circle fs-5 opacity-50"></i>
                   <div class="hstack gap-2">
@@ -83,18 +141,16 @@
                       {{ participant.firstname }} {{ participant.lastname }}
                     </p>
                   </div>
+                  <i
+                    v-if="meeting.editorsIds?.includes(participant.id)"
+                    class="bi bi-pen ms-auto opacity-50"
+                  ></i>
                 </div>
-                
               </div>
             </div>
 
-            <div
-              v-if="
-                (updateState && meeting.creatorId == userStore.user.id) || // permission to update for creator
-                (updateState && ['admin', 'coordinator'].includes(userStore.user.role)) // higher roles
-              "
-            >
-              <div class="vstack gap-2" style="height: 300px">
+            <div v-if="updateState && userWithPermissions">
+              <div class="vstack gap-2" style="height: 250px">
                 <div
                   class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
                 >
@@ -113,7 +169,6 @@
                     <label :for="user.id" class="form-check-label"
                       ><div>
                         <p class="fw-bolder m-0">{{ user.firstname }} {{ user.lastname }}</p>
-                        <p class="fw-light m-0">{{ user.email }}</p>
                       </div>
                     </label>
                   </div>
@@ -121,38 +176,10 @@
               </div>
             </div>
           </div>
-          <div v-if="!userStore.loading && !meetingsStore.loading">
-            <div v-if="!updateState || (!updateState && meetingsStore.meeting.participants.find(
-        (participant) => participant.id === this.userStore.user.id
-      ).permissions.editor)">
-              <div
-                class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
-              >
-                <p class="m-0 p-0">Editors</p>
-              </div>
-              <div class="vstack gap-2 py-2">
-                <div
-                  v-for="id in meeting.editorsIds"
-                  :key="id"
-                  class="border border-solid border-1 hstack gap-3 py-2 px-4"
-                >
-                  <i class="bi bi-person-circle fs-5 opacity-50"></i>
-                  <div class="hstack gap-2">
-                    <p class="fw-bolder m-0">
-                      {{ userStore.users.find((user) => user.id == id).firstname }} {{ userStore.users.find((user) => user.id == id).lastname }}
-                    </p>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
 
-            <div
-              v-if="
-                (updateState && meeting.creatorId == userStore.user.id) || // permission to update for creator
-                (updateState && ['admin', 'coordinator'].includes(userStore.user.role)) // higher roles
-              "
-            >
+          <!-- Editors -->
+          <div v-if="!userStore.loading && !meetingsStore.loading">
+            <div v-if="updateState && ['admin', 'coordinator'].includes(userStore.user.role)">
               <div class="vstack gap-2" style="height: 300px">
                 <div
                   class="mb-2 pb-2 border-bottom border-solid border-1 d-flex justify-content-between align-items-center"
@@ -160,19 +187,19 @@
                   <p class="m-0">Editors</p>
                 </div>
                 <div class="ps-1 overflow-auto">
-                  <div class="form-check" v-for="id in meeting.participantsIds" :key="id">
+                  <div class="form-check" v-for="user in userStore.users" :key="user.id">
                     <input
                       type="checkbox"
                       class="form-check-input"
-                      :id="id"
-                      :value="id"
+                      :id="user.id"
+                      :value="user.id"
                       v-model="meeting.editorsIds"
-                      :checked="meeting.editorsIds.includes(id)"
+                      :checked="meeting.editorsIds?.includes(user.id)"
                     />
-                    <label :for="id" class="form-check-label"
+                    <label :for="user.id" class="form-check-label"
                       ><div>
-                        <p class="fw-bolder m-0">{{ userStore.users.find((user) => user.id == id).firstname }} {{ userStore.users.find((user) => user.id == id).lastname }}</p>
-                        <p class="fw-light m-0">{{ userStore.users.find((user) => user.id == id).email }}</p>
+                        <p class="fw-bolder m-0">{{ user.firstname }} {{ user.lastname }}</p>
+                        <!-- <p class="fw-light m-0">{{ user.email }}</p> -->
                       </div>
                     </label>
                   </div>
@@ -182,10 +209,13 @@
           </div>
         </div>
 
-        <!-- Activity details -->
-        <div class="vstack col-7">
+        <!-- Meeting details -->
+        <div class="vstack col-8">
           <p class="m-0 mx-5 mb-2 pb-2 border-bottom border-solid border-1">Meeting details</p>
-          <MeetingDetails v-if="!updateState" :meeting="meetingsStore.meeting" />
+          <MeetingDetails
+            v-if="!updateState && !meetingsStore.loading"
+            :meeting="meetingsStore.meeting"
+          />
           <div v-if="updateState" class="vstack gap-2 py-2 px-5">
             <form class="vstack gap-2">
               <div class="form-group">
@@ -198,25 +228,15 @@
                   v-model="meeting.subject"
                 />
               </div>
-              <div class="form-group">
-                <label for="notes">Notes</label>
-                <textarea
-                  id="notes"
-                  type="text"
-                  class="form-control"
-                  placeholder="Any extra notes..."
-                  rows="3"
-                  v-model="meeting.notes"
-                />
-              </div>
-              <!-- optional fields -->
+              <label for="notes">Notes</label>
+              <TiptapEditor v-model:content="meeting.notes"></TiptapEditor>
               <p>*Required fields</p>
             </form>
           </div>
         </div>
 
         <!-- Images -->
-        <div class="col col-3">
+        <div class="col col-2">
           <div class="vstack">
             <p class="m-0 mb-2 pb-2 border-bottom border-solid border-1">Images</p>
             <div v-if="meeting.images.length" class="mt-3 mb-3">
@@ -349,25 +369,18 @@
 </template>
 
 <script>
-import { onBeforeMount, reactive, ref, unref, watchEffect } from 'vue'
+import { onBeforeMount, reactive, ref, unref } from 'vue'
 import { useMeetingsStore } from '../../stores/meetings'
 import { useUserStore } from '../../stores/user'
 import { useRoute, useRouter } from 'vue-router'
-import MeetingDetails from '../../components/MeetingDetails.vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minValue, helpers } from '@vuelidate/validators'
+import MeetingDetails from '../../components/MeetingDetails.vue'
+import TiptapEditor from '../../components/text-editor/TiptapEditor.vue'
 
 export default {
-  components: { MeetingDetails },
-  computed: {
-    ifPermissions() {
-      return this.meetingsStore.meeting.participants.find(
-        (participant) => participant.id === this.userStore.user.id
-      ).permissions.editor
-    },
-  },
+  components: { MeetingDetails, TiptapEditor },
   setup() {
-    // let uploadedImages = ref([])
     const updateState = ref(false)
     const route = useRoute()
     const router = useRouter()
@@ -375,15 +388,15 @@ export default {
     const meetingsStore = useMeetingsStore()
     let disableStartDate = ref(false)
     let disableEndDate = ref(false)
+    const userWithPermissions = ref(false)
     let meeting = reactive({
       id: '',
       subject: '',
       participantsIds: [],
       editorsIds: [],
-      notes: [],
-      images: [],
-      participantsIds: [],
-      editorsIds: []
+      participants: [],
+      notes: '',
+      images: []
     })
 
     const rules = {
@@ -392,20 +405,21 @@ export default {
 
     const v$ = useVuelidate(rules, meeting)
 
-    const reasignToReactiveMeeting = () => {
-      meeting.id = meetingsStore.meeting.id
-      meeting.subject = meetingsStore.meeting.subject
-      meeting.participantsIds = meetingsStore.meeting.participants.map((p) => p.id)
-      meeting.editorsIds = meetingsStore.meeting.participants.map((p) => {
-        if (p.permissions.editor) return p.id
-      })
-      meeting.notes = meetingsStore.meeting.notes
+    const reasignToReactiveMeeting = (fetchedMeeting) => {
+      Object.entries(fetchedMeeting).forEach(([key, value]) => (meeting[key] = value))
+      meeting.participantsIds = fetchedMeeting.participants.map((p) => p.id)
+      meeting.editorsIds = fetchedMeeting.participants.reduce(
+        (acc, p) => (p.permissions.editor ? [...acc, p.id] : acc),
+        []
+      )
     }
 
     onBeforeMount(async () => {
       await userStore.getAllUsers()
       await meetingsStore.fetchMeeting(route.params.meetingId)
       reasignToReactiveMeeting(meetingsStore.meeting)
+      userWithPermissions.value =
+        userStore.user.role !== 'member' || meeting.editorsIds.includes(userStore.user.id)
     })
 
     const handleImageChange = (event) => {
@@ -435,12 +449,25 @@ export default {
       )
       meetingFormData.set('participantsIds', JSON.stringify(meeting.participantsIds))
       meetingFormData.set('editorsIds', JSON.stringify(meeting.editorsIds))
+      let oldImagesIds = meeting.images.reduce(
+        (acc, image) => (image.filepath ? [...acc, image.id] : acc), // if it has filepath, it means that it has been somewhere stored
+        []
+      )
+      meetingFormData.set('oldImagesIds', JSON.stringify(oldImagesIds))
       meeting.images.forEach((image) => {
         meetingFormData.append('images', image.file)
       })
 
-      await meetingsStore.updateMeeting(meetingFormData, route.params.meetingId)
+      await meetingsStore.updateMeeting(meetingFormData)
 
+      await refreshPageData()
+    }
+
+    const handleFinish = async () => {
+      const meetingFormData = new FormData()
+      meetingFormData.append('id', meeting.id)
+      meetingFormData.append('endTime', new Date())
+      await meetingsStore.updateMeeting(meetingFormData)
       await refreshPageData()
     }
 
@@ -456,7 +483,9 @@ export default {
       disableStartDate,
       disableEndDate,
       meetingsStore,
-      refreshPageData
+      refreshPageData,
+      handleFinish,
+      userWithPermissions
     }
   }
 }

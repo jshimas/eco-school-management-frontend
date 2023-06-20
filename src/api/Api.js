@@ -12,7 +12,7 @@ class Api {
     })
 
     this.clientMultiPart = axios.create({
-      baseURL: 'https://cooperative-attire-goat.cyclic.app/api/v1' + baseURL,
+      baseURL: this.devolopmentURL + baseURL,
       withCredentials: true,
       headers: {
         authorization: `Bearer ${VueCookies.get('jwt')}`,
@@ -26,8 +26,6 @@ class Api {
   }
 
   async post(url, data = {}) {
-    console.log(data)
-    console.log(url)
     return await this.client.post(url, data)
   }
 

@@ -160,7 +160,7 @@ const meeting = reactive({
   date: '',
   startTime: '',
   place: '',
-  editorsIds: [],
+  editorsIds: []
 })
 
 const meetingChanged = ref(false)
@@ -186,7 +186,7 @@ const rules = {
     )
   },
   startTime: {
-    required: helpers.withMessage(`Start time cannot be empty`, required),
+    required: helpers.withMessage(`Start time cannot be empty`, required)
   },
   editorsIds: { required: helpers.withMessage(`Pick meeting supervisors`, required) }
 }
@@ -201,9 +201,7 @@ const createmeeting = async () => {
   const isFormCorrect = await unref(v$).$validate()
   if (!isFormCorrect) return
 
-  meeting.startTime = meeting.date + 'T' + meeting.startTime + ":00.000Z";
-
-  console.log(meeting);
+  meeting.startTime = meeting.date + 'T' + meeting.startTime + ':00.000Z'
 
   await meetingsStore.createMeeting(meeting)
   await meetingsStore.fetchAllMettings()

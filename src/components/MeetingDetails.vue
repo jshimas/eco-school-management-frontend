@@ -1,5 +1,5 @@
 <template>
-  <div class="row row-cols-2 g-3 py-2 px-5">
+  <div class="row row-cols-2 g-3 py-2 px-5" v-if="meeting">
     <div class="col">
       <p class="fs-6 fw-bold mb-0 text-secondary text-uppercase">Start date | Time</p>
       <p class="fs-6 m-0">{{ formatDate(meeting.date) }} | {{ formatTime(meeting.startTime) }}</p>
@@ -17,10 +17,13 @@
       </p>
     </div>
     <div class="col-12">
-      <p class="fs-12 fw-bold mb-0 text-secondary text-uppercase">Notes</p>
-      <p class="fs-12 m-0">
-        {{ meeting.notes }}
-      </p>
+      <p class="fs-12 fw-bold mb-0 text-secondary text-uppercase border-bottom pb-2 mb-4">Notes</p>
+      <p
+        class="fs-12 m-0"
+        v-if="meeting.notes"
+        v-html="meeting.notes || 'Edit the meeting to add some notes...'"
+      ></p>
+      <p class="fs-12 m-0 opacity-50" v-else>Edit the meeting to add some notes...</p>
     </div>
   </div>
 </template>
@@ -46,3 +49,9 @@ export default {
   }
 }
 </script>
+<style>
+blockquote {
+  border-left: 3px solid #ddd;
+  padding-left: 1rem;
+}
+</style>

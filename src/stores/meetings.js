@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import MeetingsApi from '../api/MeetingsApi';
+import MeetingsApi from '../api/MeetingsApi'
 
 export const useMeetingsStore = defineStore('meeting', {
   state: () => ({
@@ -8,7 +8,6 @@ export const useMeetingsStore = defineStore('meeting', {
     error: null,
     loading: false
   }),
-
 
   actions: {
     async fetchAllMettings() {
@@ -19,7 +18,7 @@ export const useMeetingsStore = defineStore('meeting', {
         this.meetings = res.data.meetings
       } catch (err) {
         this.error = err
-        console.log(err);
+        console.log(err)
       } finally {
         this.loading = false
       }
@@ -38,6 +37,7 @@ export const useMeetingsStore = defineStore('meeting', {
         this.loading = false
       }
     },
+
     async createMeeting(data) {
       try {
         this.loading = true
@@ -51,12 +51,13 @@ export const useMeetingsStore = defineStore('meeting', {
         this.loading = false
       }
     },
-    async updateMeeting(meeting) {
+
+    async updateMeeting(meetingData) {
       try {
         this.loading = true
         const meetingsApi = new MeetingsApi()
-        const res = await meetingsApi.updateMeetingById(meeting)
-
+        const res = await meetingsApi.updateMeetingById(meetingData)
+        console.log(res)
       } catch (err) {
         console.log(err)
         this.error = err
@@ -66,7 +67,5 @@ export const useMeetingsStore = defineStore('meeting', {
     }
   },
 
-  getters: {
-    
-  }
+  getters: {}
 })
